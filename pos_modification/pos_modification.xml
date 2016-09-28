@@ -1,0 +1,14 @@
+<openerp>
+    <data>
+        <template id="index" inherit_id='point_of_sale.index' name="Restaurant Index">&lt;!DOCTYPE html&gt;
+            <xpath expr="//link[@id='pos-stylesheet']" position="after">
+                <link rel="stylesheet" href="/pos_modification/static/src/css/pos_modification.css"/>
+            </xpath>
+        </template>
+        <template id="assets_backend" name="pos_modification assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/pos_modification/static/src/js/pos_modification.js"></script>
+            </xpath>
+        </template>
+    </data>
+</openerp>
