@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+        <!-- Form view -->
+    <record id="view_form_canzo_group" model="ir.ui.view">
+      <field name="name">canzo Group</field>
+      <field name="model">canzo.group</field>
+      <field name="arch" type="xml">
+
+        <form string="canzo Group">
+              <!-- Content goes here: -->
+            <h1>
+               <field name="name"/>
+            </h1>
+            <p><i>Name must match exactly to how it appears in Active Directory</i></p>
+            <field name="path" />
+            <p><i>Path must match exactly to how it appears in Active Directory</i></p>
+        </form>
+      </field>
+    </record>
+    <!-- Form view -->
+    <record id="view_form_canzo_user" model="ir.ui.view">
+      <field name="name">canzo User</field>
+      <field name="model">canzo.user</field>
+      <field name="arch" type="xml">
+
+        <form string="canzo User">
+          <header>
+            <button string="Disable User" type="object" name="disable_user" attrs="{'invisible': [('state','=','disabled')]}"/>
+            <button string="Enable User" type="object" name="enable_user" attrs="{'invisible': [('state','=','enable')]}"/>
+            <button string="Set Password" type="object" name="set_password" />
+            <button string="Reset Password" type="object" name="reset_password" />
+            <field name="state" widget="statusbar" clickable="True"/>
+          </header>
+          <sheet string="canzo User">
+              <!-- Content goes here: -->
+              <label name="name" string="Username" />
+              <newline/>
+            <h1>
+               <field name="name" placeholder="Username" /> <!-- Username-->
+            </h1>
+            <group name="group_top">
+              <group name="group_left">
+                <field name="first_name"/>
+                <field name="last_name"/>
+                <field name="display_name"/>
+                <field name="email"/>
+              </group>
+              <group name="group_right">
+                  <field name="contract_id" />
+                  <i>Contract will auto-populate when creating from a contract, after saving the parent contract.</i>
+                  <newline/>
+                  <field name="groups" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="locked" />
+              </group>
+            </group>
+            <notebook>
+              <page string="Other Notes">
+                <field name="comments" placeholder="Add additional notes..." />
+              </page>
+            </notebook>
+          </sheet>
+          <div class="oe_chatter">
+            <field name="message_follower_ids" widget="mail_followers" />
+            <field name="message_ids" widget="mail_thread" />
+          </div>
+        </form>
+      </field>
+    </record>
+    <!-- Tree View -->
+    <record id="view_tree_canzo_user" model="ir.ui.view">
+      <field name="name">canzo User</field>
+      <field name="model">canzo.user</field>
+      <field name="arch" type="xml">
+        <tree colors="red:state=='disabled'">
+          <field name="name"/>
+          <field name="first_name"/>
+          <field name="last_name"/>
+          <field name="email"/>
+          <field name="locked"/>
+          <field name="contract_id"/>
+          <field name="state"/>
+        </tree>
+      </field>
+    </record>
+
+    <!-- Kanban view -->
+
+    <!-- Search view -->
+    <record id="view_filter_canzo_user" model="ir.ui.view">
+      <field name="name">User Search</field>
+      <field name="model">canzo.user</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="name"/>
+          <field name="first_name"/>
+          <field name="last_name"/>
+          <filter string="Locked"
+                  domain="[('locked','=',True)]"/>
+          <filter string="Disabled"
+                  domain="[('state','=','disabled')]"/>
+          <filter string="Enabled"
+                  domain="[('state','=','enabled')]"/>
+        </search>
+      </field>
+    </record>
+
+    <act_window id="action_canzo_user" name="canzo Users"
+    res_model="canzo.user" view_mode="tree,form" />
+
+    <!-- Menu item to open To-do Task list -->
+    <menuitem id="menu _canzo_user"
+      name="canzo Users"
+      parent="base.menu_sales"
+      sequence="21"
+      action="action_canzo_user" />
+
+          <record id="do_sync_group" model="ir.actions.server">
+        <field name="name">Make Testing</field>
+        <field name="condition">True</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="model_canzo_group" />
+        <field name="state">code</field>
+        <field name="code">self.do_sync_groups(cr, uid, context.get('active_ids', []), context=context)</field>
+    </record>
+
+      <menuitem id="menu_canzo_group"
+                name="Sync Groups"
+                parent="base.menu_sales"
+                sequence="22"
+                action="do_sync_group" />
+
+
+
+    <record model="ir.ui.view" id="analytic_analytic_account_form_canzo_user">
+        <field name="name">analytic.analytic.account.form</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+        <field name="arch" type="xml">
+            <group name="contractinfo" position="after">
+               <field name="users" nolabel="1" widget="one2many_list" context="{'contract_id': active_id}">
+                    <tree string="canzo Users" colors="gray:state=='disabled';red:locked==True">
+                          <field name="name"/>
+                          <field name="first_name"/>
+                          <field name="last_name"/>
+                          <field name="email"/>
+                          <field name="locked"/>
+                          <field name="contract_id"/>
+                    </tree>
+               </field>
+            </group>
+        </field>
+    </record>
+
+  </data>
+</openerp>
