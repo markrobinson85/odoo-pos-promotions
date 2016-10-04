@@ -2,12 +2,12 @@
 <openerp>
   <data>
     <!-- Form view -->
-    <record id="view_form_canzo_pos_promotion" model="ir.ui.view">
-      <field name="name">canzo User</field>
-      <field name="model">canzo.user</field>
+    <record id="view_form_pos_promotion" model="ir.ui.view">
+      <field name="name">Promotion Rule</field>
+      <field name="model">pos.promotion</field>
       <field name="arch" type="xml">
 
-        <form string="canzo User">
+        <form string="Promotion">
           <header>
             <button string="Disable User" type="object" name="disable_user" attrs="{'invisible': [('state','=','disabled')]}"/>
             <button string="Enable User" type="object" name="enable_user" attrs="{'invisible': [('state','=','enable')]}"/>
@@ -15,31 +15,49 @@
             <button string="Reset Password" type="object" name="reset_password" />
             <field name="state" widget="statusbar" clickable="True"/>
           </header>
-          <sheet string="canzo User">
+          <sheet string="Promotion">
               <!-- Content goes here: -->
-              <label name="name" string="Username" />
+              <label name="name" string="Promotion Name" />
               <newline/>
             <h1>
-               <field name="name" placeholder="Username" /> <!-- Username-->
+               <field name="name" placeholder="Promotion Name" /> <!-- Username-->
             </h1>
             <group name="group_top">
               <group name="group_left">
-                <field name="first_name"/>
-                <field name="last_name"/>
-                <field name="display_name"/>
-                <field name="email"/>
+                  <h1>General</h1>
+                  <field name="label"/>
+                  <field name="locations"/>
+                  <field name="active"/>
+                  <field name="date_start"/>
+                  <field name="date_end"/>
+                  <field name="coupon_code"/>
+                  <field name="priority"/>
+                  <i>Rules are executed starting from lowest number to highest.</i>
               </group>
-              <group name="group_right">
-                  <field name="contract_id" />
-                  <i>Contract will auto-populate when creating from a contract, after saving the parent contract.</i>
-                  <newline/>
-                  <field name="groups" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="locked" />
+              <group name="group_left">
+                  <h1>Conditions</h1>
+                  <h3>Apply and exclude categories</h3>
+                  <field name="categories_applied" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="categories_excluded" options="{'no_create': True}" widget="many2many_tags" />
+                  <h3>Apply and exclude products</h3>
+                  <field name="products_applied" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="products_excluded" options="{'no_create': True}" widget="many2many_tags" />
+                  <h3>Apply and exclude tagged products</h3>
+                  <field name="tags_applied" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="tags_excluded" options="{'no_create': True}" widget="many2many_tags" />
+              </group>
+              <group name="group_left">
+                  <h1>Actions</h1>
+                  <field name="discount_type"/>
+                  <field name="discount_step"/>
+                  <field name="discount_amount"/>
+                  <field name="max_qty"/>
+                  <field name="stop_processing"/>
               </group>
             </group>
             <notebook>
               <page string="Other Notes">
-                <field name="comments" placeholder="Add additional notes..." />
+                <field name="description" placeholder="Add additional internal notes..." />
               </page>
             </notebook>
           </sheet>
@@ -51,18 +69,16 @@
       </field>
     </record>
     <!-- Tree View -->
-    <record id="view_tree_canzo_user" model="ir.ui.view">
-      <field name="name">canzo User</field>
-      <field name="model">canzo.user</field>
+    <record id="view_tree_pos_promotion" model="ir.ui.view">
+      <field name="name">Promotion Rules</field>
+      <field name="model">pos.promotion</field>
       <field name="arch" type="xml">
         <tree colors="red:state=='disabled'">
           <field name="name"/>
-          <field name="first_name"/>
-          <field name="last_name"/>
-          <field name="email"/>
-          <field name="locked"/>
-          <field name="contract_id"/>
-          <field name="state"/>
+          <field name="date_start"/>
+          <field name="date_end"/>
+          <field name="discount_type"/>
+          <field name="label"/>
         </tree>
       </field>
     </record>
@@ -70,70 +86,31 @@
     <!-- Kanban view -->
 
     <!-- Search view -->
-    <record id="view_filter_canzo_user" model="ir.ui.view">
+    <record id="view_filter_pos_promotion" model="ir.ui.view">
       <field name="name">User Search</field>
-      <field name="model">canzo.user</field>
+      <field name="model">pos.promotion</field>
       <field name="arch" type="xml">
         <search>
           <field name="name"/>
-          <field name="first_name"/>
-          <field name="last_name"/>
-          <filter string="Locked"
-                  domain="[('locked','=',True)]"/>
+          <field name="label"/>
+          <field name="discount_type"/>
           <filter string="Disabled"
-                  domain="[('state','=','disabled')]"/>
-          <filter string="Enabled"
-                  domain="[('state','=','enabled')]"/>
+                  domain="[('active','=', False)]"/>
+          <filter string="Active"
+                  domain="[('active','=', True)]"/>
         </search>
       </field>
     </record>
 
-    <act_window id="action_canzo_user" name="canzo Users"
-    res_model="canzo.user" view_mode="tree,form" />
+    <act_window id="action_pos_promotion" name="POS Promotions"
+    res_model="pos.promotion" view_mode="tree,form" />
 
     <!-- Menu item to open To-do Task list -->
-    <menuitem id="menu _canzo_user"
-      name="canzo Users"
-      parent="base.menu_sales"
+    <menuitem id="menu_pos_promotion"
+      name="POS Promotions"
+      parent="point_of_sale.menu_point_root"
       sequence="21"
-      action="action_canzo_user" />
-
-          <record id="do_sync_group" model="ir.actions.server">
-        <field name="name">Make Testing</field>
-        <field name="condition">True</field>
-        <field name="type">ir.actions.server</field>
-        <field name="model_id" ref="model_canzo_group" />
-        <field name="state">code</field>
-        <field name="code">self.do_sync_groups(cr, uid, context.get('active_ids', []), context=context)</field>
-    </record>
-
-      <menuitem id="menu_canzo_group"
-                name="Sync Groups"
-                parent="base.menu_sales"
-                sequence="22"
-                action="do_sync_group" />
-
-
-
-    <record model="ir.ui.view" id="analytic_analytic_account_form_canzo_user">
-        <field name="name">analytic.analytic.account.form</field>
-        <field name="model">account.analytic.account</field>
-        <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
-        <field name="arch" type="xml">
-            <group name="contractinfo" position="after">
-               <field name="users" nolabel="1" widget="one2many_list" context="{'contract_id': active_id}">
-                    <tree string="canzo Users" colors="gray:state=='disabled';red:locked==True">
-                          <field name="name"/>
-                          <field name="first_name"/>
-                          <field name="last_name"/>
-                          <field name="email"/>
-                          <field name="locked"/>
-                          <field name="contract_id"/>
-                    </tree>
-               </field>
-            </group>
-        </field>
-    </record>
+      action="action_pos_promotion" />
 
   </data>
 </openerp>

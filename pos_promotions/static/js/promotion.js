@@ -1,4 +1,4 @@
-odoo.define('canzo.pos.promotional', function (require) {
+odoo.define('pos.promotion', function (require) {
 "use strict";
 
 var models = require('point_of_sale.models');
@@ -14,7 +14,7 @@ models.load_fields('product.template','categ_id');
 
 models.load_models([
     {
-        model: 'canzo.pos.promotional',
+        model: 'pos.promotion',
         condition: function(self){ return !!self.config.loyalty_id[0]; },
         fields: ['name','pp_currency','pp_product','pp_order','rounding'],
         domain: function(self){ return [['id','=',self.config.loyalty_id[0]]]; },
