@@ -3,7 +3,7 @@ from openerp import models, fields, api
 
 class Promotion(models.Model):
     #_inherit = 'account.analytic.account'
-    _name = 'canzo.pos.promotion'
+    _name = 'pos.promotion'
     _description = 'Promotional Rule'
     _inherit = 'mail.thread'
     locations = fields.One2many('stock.warehouse', 'warehouse_id', string="Locations")

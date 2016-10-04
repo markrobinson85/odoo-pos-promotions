@@ -1,25 +1,8 @@
 <?xml version="1.0"?>
 <openerp>
   <data>
-        <!-- Form view -->
-    <record id="view_form_canzo_group" model="ir.ui.view">
-      <field name="name">canzo Group</field>
-      <field name="model">canzo.group</field>
-      <field name="arch" type="xml">
-
-        <form string="canzo Group">
-              <!-- Content goes here: -->
-            <h1>
-               <field name="name"/>
-            </h1>
-            <p><i>Name must match exactly to how it appears in Active Directory</i></p>
-            <field name="path" />
-            <p><i>Path must match exactly to how it appears in Active Directory</i></p>
-        </form>
-      </field>
-    </record>
     <!-- Form view -->
-    <record id="view_form_canzo_user" model="ir.ui.view">
+    <record id="view_form_canzo_pos_promotion" model="ir.ui.view">
       <field name="name">canzo User</field>
       <field name="model">canzo.user</field>
       <field name="arch" type="xml">
