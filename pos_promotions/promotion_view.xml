@@ -1,19 +1,16 @@
 <?xml version="1.0"?>
 <openerp>
   <data>
-    <!-- Form view -->
     <record id="view_form_pos_promotion" model="ir.ui.view">
-      <field name="name">Promotion Rule</field>
+      <field name="name">pos.promotion.form</field>
       <field name="model">pos.promotion</field>
       <field name="arch" type="xml">
 
         <form string="Promotion">
           <header>
-            <button string="Disable User" type="object" name="disable_user" attrs="{'invisible': [('state','=','disabled')]}"/>
-            <button string="Enable User" type="object" name="enable_user" attrs="{'invisible': [('state','=','enable')]}"/>
-            <button string="Set Password" type="object" name="set_password" />
-            <button string="Reset Password" type="object" name="reset_password" />
-            <field name="state" widget="statusbar" clickable="True"/>
+            <!--<button string="Disable Rule" type="object" name="disable_user" attrs="{'invisible': [('active','=',True)]}"/>
+            <button string="Enable Rule" type="object" name="enable_user" attrs="{'invisible': [('state','=',False)]}"/>
+            <field name="active" widget="statusbar" clickable="True"/>-->
           </header>
           <sheet string="Promotion">
               <!-- Content goes here: -->
@@ -22,42 +19,32 @@
             <h1>
                <field name="name" placeholder="Promotion Name" /> <!-- Username-->
             </h1>
-            <group name="group_top">
-              <group name="group_left">
-                  <h1>General</h1>
-                  <field name="label"/>
+
+            <group name="group_left">
+                 <field name="label"/>
                   <field name="locations"/>
                   <field name="active"/>
                   <field name="date_start"/>
                   <field name="date_end"/>
                   <field name="coupon_code"/>
                   <field name="priority"/>
-                  <i>Rules are executed starting from lowest number to highest.</i>
-              </group>
-              <group name="group_left">
-                  <h1>Conditions</h1>
-                  <h3>Apply and exclude categories</h3>
-                  <field name="categories_applied" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="categories_excluded" options="{'no_create': True}" widget="many2many_tags" />
-                  <h3>Apply and exclude products</h3>
-                  <field name="products_applied" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="products_excluded" options="{'no_create': True}" widget="many2many_tags" />
-                  <h3>Apply and exclude tagged products</h3>
+                  <!--<h3>Apply and exclude tagged products</h3>
                   <field name="tags_applied" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="tags_excluded" options="{'no_create': True}" widget="many2many_tags" />
-              </group>
-              <group name="group_left">
-                  <h1>Actions</h1>
+                  <field name="tags_excluded" options="{'no_create': True}" widget="many2many_tags" />-->
                   <field name="discount_type"/>
                   <field name="discount_step"/>
                   <field name="discount_amount"/>
                   <field name="max_qty"/>
                   <field name="stop_processing"/>
-              </group>
+                  <field name="categories_applied" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="categories_excluded" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="products_applied" options="{'no_create': True}" widget="many2many_tags" />
+                  <field name="products_excluded" options="{'no_create': True}" widget="many2many_tags" />
             </group>
+
             <notebook>
               <page string="Other Notes">
-                <field name="description" placeholder="Add additional internal notes..." />
+                <field name="notes" placeholder="Add additional internal notes..." />
               </page>
             </notebook>
           </sheet>
@@ -68,49 +55,19 @@
         </form>
       </field>
     </record>
-    <!-- Tree View -->
-    <record id="view_tree_pos_promotion" model="ir.ui.view">
-      <field name="name">Promotion Rules</field>
-      <field name="model">pos.promotion</field>
-      <field name="arch" type="xml">
-        <tree colors="red:state=='disabled'">
-          <field name="name"/>
-          <field name="date_start"/>
-          <field name="date_end"/>
-          <field name="discount_type"/>
-          <field name="label"/>
-        </tree>
-      </field>
-    </record>
 
-    <!-- Kanban view -->
+      <record model="ir.actions.act_window" id="action_list_promotions">
+          <field name="name">Promotions</field>
+          <field name="res_model">pos.promotion</field>
+          <field name="view_mode">tree,form</field>
+          <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                  Create your first promotion rule.
+              </p>
+          </field>
+      </record>
+      <menuitem id="menu_promotions" parent="point_of_sale.menu_point_root" name="POS Promotions" sequence="10" action="action_list_promotions" />
 
-    <!-- Search view -->
-    <record id="view_filter_pos_promotion" model="ir.ui.view">
-      <field name="name">User Search</field>
-      <field name="model">pos.promotion</field>
-      <field name="arch" type="xml">
-        <search>
-          <field name="name"/>
-          <field name="label"/>
-          <field name="discount_type"/>
-          <filter string="Disabled"
-                  domain="[('active','=', False)]"/>
-          <filter string="Active"
-                  domain="[('active','=', True)]"/>
-        </search>
-      </field>
-    </record>
-
-    <act_window id="action_pos_promotion" name="POS Promotions"
-    res_model="pos.promotion" view_mode="tree,form" />
-
-    <!-- Menu item to open To-do Task list -->
-    <menuitem id="menu_pos_promotion"
-      name="POS Promotions"
-      parent="point_of_sale.menu_point_root"
-      sequence="21"
-      action="action_pos_promotion" />
 
   </data>
 </openerp>
