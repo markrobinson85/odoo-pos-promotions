@@ -7,5 +7,9 @@
     'data': [
         'promotion_view.xml',
         'security/ir.model.access.csv',
+        'data.xml'
+    ],
+    'js': [
+        'static/js/promotion.js',
     ],
 }

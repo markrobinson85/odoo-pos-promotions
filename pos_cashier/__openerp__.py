@@ -18,9 +18,8 @@ Instead of choosing the user and needing multiple users, use one user for the Po
         'cashier_view.xml',
         'order_cashier_view.xml',
     ],
-    'js': [
-        'static/src/js/pos_cashier.js',
-    ],
+
+
     'css': [
         'static/src/css/pos_cashier.css',
     ],
