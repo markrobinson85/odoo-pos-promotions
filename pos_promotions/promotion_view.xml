@@ -67,7 +67,16 @@
           </field>
       </record>
       <menuitem id="menu_promotions" parent="point_of_sale.menu_point_root" name="POS Promotions" sequence="10" action="action_list_promotions" />
-
-
+      <!-- POS Orderline - Add rule_stop -->
+      <!--<record id="pos_inherited" model="ir.ui.view">
+            <field name="name">POS View</field>
+            <field name="model">pos.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+            <field name="arch" type="xml"/>
+            <xpath expr="//page[@string='Products']/field[@name='lines']/tree[@string='Order lines']/field[@name='price_subtotal_incl']" position="after">
+                <field name="rule_stop"/>
+            </xpath>
+      </record>-->
   </data>
 </openerp>

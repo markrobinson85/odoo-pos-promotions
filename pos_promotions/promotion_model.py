@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import models, fields, api
+from openerp.osv import osv
 
 class Promotion(models.Model):
     #_inherit = "account.analytic.account"
@@ -24,3 +25,8 @@ class Promotion(models.Model):
     products_applied = fields.Many2many("product.template", string="Products Applied", track_visibility="onchange")
     products_excluded = fields.Many2many("product.template", string="Products Excluded", track_visibility="onchange")
     label = fields.Char("Label (How discount appears on receipt)", track_visiblity="onchange", track_visibility="onchange")
+
+class PromotionOrderLine(osv.osv):
+    _inherit = 'pos.order.line'
+    rule_stop = fields.Boolean('Stop running rules')
+    # rules_applied = fields.Many2many("pos.promotion", string="Promotion Rules Applied")

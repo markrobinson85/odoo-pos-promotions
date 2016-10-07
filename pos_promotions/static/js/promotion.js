@@ -11,6 +11,7 @@ var QWeb     = core.qweb;
 
 // make sure to load product category.
 models.load_fields('product.template','categ_id');
+models.load_fields('pos.order.line','rule_stop');
 
 models.load_models([
     {
@@ -85,10 +86,9 @@ screens.OrderWidget.extend({
     // Execute our sales rules each time the order is updated.
     execute_rules: function(){
         //this._super();
-
-
     }
 });
+
 function execute_rules(this_screen){
 
         var order = this_screen.pos.get_order();
@@ -117,6 +117,7 @@ function execute_rules(this_screen){
             });
         });
 }
+
 screens.OrderWidget.include({
      orderline_add: function(){
         var self = this;
@@ -125,7 +126,7 @@ screens.OrderWidget.include({
      },
      orderline_remove: function(line){
         var self = this;
-        this._super();
+        //this._super();
         self.execute_rules();
      },
      execute_rules: function(){
@@ -142,10 +143,12 @@ screens.OrderWidget.include({
             _.each(orderlines, function(line){
                 console.log(line);
                 //rule.categories_applied["0"];
-
                 if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])){
-                    if (rule.discount_type == 'to_percent'){
-                        line.set_discount(rule.discount_amount);
+                    switch(rule.discount_type){
+                        case 'to_percent':
+                            line.set_discount(rule.discount_amount);
+                            break;
+
                     }
                 }
             });
