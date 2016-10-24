@@ -82,14 +82,14 @@ models.load_models([
 //models.Order = models.Order.extend({
 
 //});
-screens.OrderWidget.extend({
-    // Execute our sales rules each time the order is updated.
-    execute_rules: function(){
-        //this._super();
-    }
-});
+    screens.OrderWidget.extend({
+        // Execute our sales rules each time the order is updated.
+        execute_rules: function(){
+            //this._super();
+        }
+    });
 
-function execute_rules(this_screen){
+    function execute_rules(this_screen){
 
         var order = this_screen.pos.get_order();
 
@@ -116,45 +116,113 @@ function execute_rules(this_screen){
                 //line.price; // the price of this orderline.
             });
         });
-}
+    }
 
-screens.OrderWidget.include({
-     orderline_add: function(){
-        var self = this;
-        this._super();
-        self.execute_rules();
-     },
-     orderline_remove: function(line){
-        var self = this;
-        //this._super();
-        self.execute_rules();
-     },
-     execute_rules: function(){
-        var order = this.pos.get_order();
+    screens.OrderWidget.include({
+         orderline_add: function(){
+            var self = this;
+            this._super();
+            self.execute_rules();
+         },
+         orderline_remove: function(line){
+            var self = this;
+            //this._super();
+            self.execute_rules();
+         },
+         execute_rules: function(){
+            // Get orderlines
+            var order = this.pos.get_order();
+            var orderlines = order.get_orderlines();
 
-        var orderlines = order.get_orderlines();
+            // Sort rules by priority.
+            var sorted_rules = _.sortBy(this.pos.promotions, function(rule){
+                return rule.priority;
+            });
 
-        var sorted_rules = _.sortBy(this.pos.promotions, function(rule){
-            return rule.priority;
-        });
+            _.each(orderlines, function(item){
+                var itemPrice = item.price;
 
-        _.each(sorted_rules, function(rule){
-            console.log(rule);
-            _.each(orderlines, function(line){
-                console.log(line);
-                //rule.categories_applied["0"];
-                if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])){
+                // If the item is free, or negative, don't process rules,.
+                if (itemPrice < 0)
+                    return;
+
+                var appliedRules = [];
+
+                // Play through each rule.
+                _.each(sorted_rules, function(rule){
+                    var order_qty = 0;
+                    var rule_percent = rule.discount_amount;
+
+                    var qty = item.get_quantity;
+
+                    var discount_amount = 0;
+                    var original_discount_amount = 0;
+
                     switch(rule.discount_type){
                         case 'to_percent':
-                            line.set_discount(rule.discount_amount);
+                            _.each(orderlines, function(line){
+                                console.log(line);
+                                //rule.categories_applied["0"];
+                                // If the orderline is in the applicable category, apply.
+                                if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])) {
+                                    line.set_discount(rule.discount_amount);
+                                    appliedRules.push(rule.id);
+                                }
+                            });
                             break;
+                        case 'bogo_cheapest':
+                            //rule.discount_step;
+                            //rule.discount_amount;
+                            var minPrice = 99999;
+                            var applyItemId = null;
+                            var step = rule.discount_step;
 
+                            var discounted_items = [];
+                            var applied_lines = [];
+                            var applied_qty = 0;
+
+                            // Iterate over each orderline.
+                            _.each(orderlines, function(line){
+                                console.log(line);
+
+                                var price = line.price;
+
+                                // rule.categories_applied["0"];
+                                // If the orderline is in the applicable category, apply.
+                                if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])) {
+                                    applied_lines.push(line);
+                                    // Add the quantity.
+                                    applied_qty += line.get_quantity();
+                                    appliedRules.push(rule.id);
+                                    //discounted_items.push(line);
+                                    line.set_discount(0);
+                                }
+                            });
+
+                            if (applied_lines.length >= step){
+                                var sorted_discounted_items = _.sortBy(applied_lines, function(item){
+                                    return item.price;
+                                });
+
+                                var filter_qty = Math.floor(applied_qty / step);
+
+                                //sorted_discounted_items.slice(0,filter_qty - 1);
+                                var apply_to = _.first(sorted_discounted_items, filter_qty);
+
+                                _.each(apply_to, function(line){
+                                    line.set_discount(rule.discount_amount);
+                                });
+                            }
+
+                            //_.filter([1,2,3,4...], function(item, index) {
+                            //  return (index % 2 == 0);
+                            //});
+
+                            break;
                     }
-                }
+
+                });
             });
-        });
-     }
+         }
+    });
 });
-
-});
-
