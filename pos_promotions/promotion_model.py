@@ -9,7 +9,7 @@ class Promotion(models.Model):
     _inherit = "mail.thread"
     name = fields.Char("Promotion Name", required=True)
     notes = fields.Text()
-    locations = fields.Many2many("stock.location", string="Locations", track_visibility="onchange")
+    locations = fields.Many2many("pos.config", string="Locations", track_visibility="onchange")
     active = fields.Boolean("Active", track_visibility="onchange")
     coupon_code = fields.Char("Coupon Code", required=False, track_visibility="onchange")
     date_start = fields.Date("Start Date", default=fields.Date.today, track_visibility="onchange")
@@ -28,5 +28,6 @@ class Promotion(models.Model):
 
 class PromotionOrderLine(osv.osv):
     _inherit = 'pos.order.line'
-    rule_stop = fields.Boolean('Stop running rules')
+    rule_ids = fields.Char('Rules applied')
+    #rule_stop = fields.Boolean('Stop running rules') #TODO: Delete this.
     # rules_applied = fields.Many2many("pos.promotion", string="Promotion Rules Applied")

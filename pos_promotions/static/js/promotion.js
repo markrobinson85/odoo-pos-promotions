@@ -11,7 +11,8 @@ var QWeb     = core.qweb;
 
 // make sure to load product category.
 models.load_fields('product.template','categ_id');
-models.load_fields('pos.order.line','rule_stop');
+models.load_fields('pos.order.line','rule_ids');
+
 
 models.load_models([
     {
@@ -20,9 +21,9 @@ models.load_models([
         fields: ['name', 'locations', 'label','notes','coupon_code','date_start', 'date_end', 'priority', 'discount_type', 'max_qty','discount_step','discount_amount','stop_processing','categories_applied','categories_excluded','products_applied','products_excluded'],
         domain: null,
         loaded: function(self,promotion_rules){
-            var promo_rules = _.filter(promotion_rules, function(item){
-                if (_.contains(item.locations, self.config.stock_location_id[0])){
-                 return item;
+            var promo_rules = _.filter(promotion_rules, function(rule){
+                if (_.contains(rule.locations, self.config.id) || rule.locations.length == 0){
+                 return rule;
                 }
             });
 
@@ -82,6 +83,34 @@ models.load_models([
 //models.Order = models.Order.extend({
 
 //});
+
+
+    var _super_orderline = models.Orderline;
+    models.Orderline = models.Orderline.extend({
+        can_be_merged_with: function(orderline){
+            var self = this;
+
+            // Returns true if BOGO applies to this line.
+            if (self.bogo_merge(orderline)){
+                return false;
+            }
+
+            if(_super_orderline.prototype.can_be_merged_with.apply(this,arguments))
+                return true;
+        },
+        bogo_merge: function(orderline) {
+            var merge = false;
+            _.each(this.pos.promotions, function(rule){
+                if (_.contains(rule.categories_applied, orderline.product.pos_categ_id[0])){
+                    if (rule.discount_type == 'bogo_cheapest') {
+                        merge = true;
+                    }
+                }
+            });
+            return merge;
+        }
+    });
+
     screens.OrderWidget.extend({
         // Execute our sales rules each time the order is updated.
         execute_rules: function(){
