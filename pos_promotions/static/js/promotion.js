@@ -108,7 +108,45 @@ models.load_models([
                 }
             });
             return merge;
-        }
+        },
+        set_quantity: function(quantity){
+            self = this;
+
+            this.order.assert_editable();
+            if(quantity === 'remove'){
+                this.order.remove_orderline(this);
+                return;
+            }
+
+            var quant = parseFloat(quantity) || 0;
+            var unit = this.get_unit();
+            if ((self.bogo_merge(this)) && (quant > 1))
+            {
+                var i = 0
+                for (i = 0; i <= quant; i++) {
+                    self.order.add_product(this.product);
+                }
+                // Because it is bogo, we will set the origianl line to just 1 quant.
+                quant = 1;
+                if(unit){
+                    if (unit.rounding) {
+                        this.quantity    = round_pr(quant, unit.rounding);
+                        var decimals = this.pos.dp['Product Unit of Measure'];
+                        //this.quantityStr = formats.format_value(round_di(this.quantity, decimals), { type: 'float', digits: [69, decimals]});
+                    } else {
+                        this.quantity    = round_pr(quant, 1);
+                        //this.quantityStr = this.quantity.toFixed(0);
+                    }
+                }else{
+                    this.quantity    = quant;
+                    this.quantityStr = '' + this.quantity;
+                }
+                this.trigger('change',this);
+            } else {
+                // Run the normal stuff.
+                _super_orderline.prototype.set_quantity.apply(this,arguments)
+            }
+        },
     });
 
     screens.OrderWidget.extend({
