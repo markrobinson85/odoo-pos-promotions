@@ -28,6 +28,4 @@ class Promotion(models.Model):
 
 class PromotionOrderLine(osv.osv):
     _inherit = 'pos.order.line'
-    rule_ids = fields.Char('Rules applied')
-    #rule_stop = fields.Boolean('Stop running rules') #TODO: Delete this.
-    # rules_applied = fields.Many2many("pos.promotion", string="Promotion Rules Applied")
+    rule_ids = fields.Char('Rules applied', default="")
