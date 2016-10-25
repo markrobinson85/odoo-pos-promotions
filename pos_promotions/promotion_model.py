@@ -29,3 +29,4 @@ class Promotion(models.Model):
 class PromotionOrderLine(osv.osv):
     _inherit = 'pos.order.line'
     rule_ids = fields.Char('Rules applied', default="")
+    rules_applied = fields.Many2many('pos.promotion', string="Promotions Applied")

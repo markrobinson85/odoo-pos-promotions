@@ -11,7 +11,20 @@ var QWeb     = core.qweb;
 
 // make sure to load product category.
 models.load_fields('product.template','categ_id');
-models.load_fields('pos.order.line','rule_ids');
+//models.load_fields('pos.order.line',['rule_ids', 'rules_applied']);
+//models.load_fields('pos.order.line','rules_applied');
+
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+}
 
 
 models.load_models([
@@ -19,12 +32,30 @@ models.load_models([
         model: 'pos.promotion',
         condition: function(self){ return !!self.config.stock_location_id[0]; },
         fields: ['name', 'locations', 'label','notes','coupon_code','date_start', 'date_end', 'priority', 'discount_type', 'max_qty','discount_step','discount_amount','stop_processing','categories_applied','categories_excluded','products_applied','products_excluded'],
-        domain: null,
+        domain: [['active', '=', true]],
         loaded: function(self,promotion_rules){
             var promo_rules = _.filter(promotion_rules, function(rule){
+                // Make sure POS Id is within rule locations, unless rule locations is empty.
                 if (_.contains(rule.locations, self.config.id) || rule.locations.length == 0){
-                 return rule;
+                    //var today = new Date().toISOString().slice(0,10);
+                    //var today = new Date().setHours(0,0,0,0);
+                    var currentDate = new Date();
+                    var day = currentDate.getDate();
+                    var month = currentDate.getMonth();
+                    var year = currentDate.getFullYear();
+                    var today = new Date(Date.UTC(year, month, day));
+                    var date_start = new Date(rule.date_start);
+                    var date_end = (!rule.date_end) ? false : new Date(rule.date_end);
+
+                    // Start date must be less than today
+                    // End date must be either greater than today, or unset.
+                    if (((+date_start <= +today) && (!date_end)) || (((+date_start <= +today) && (+date_end >= +today))))
+                    {
+                        return rule;
+                    }
+
                 }
+                //return;
             });
 
             self.promotions = promo_rules;
@@ -87,6 +118,12 @@ models.load_models([
 
     var _super_orderline = models.Orderline;
     models.Orderline = models.Orderline.extend({
+        initialize: function(attr,options){
+            var self = this;
+            _super_orderline.prototype.initialize.apply(self,arguments)
+            self.rules_applied = [];
+            self.stop_processing = false;
+        },
         can_be_merged_with: function(orderline){
             var self = this;
 
@@ -213,7 +250,11 @@ models.load_models([
                 if (itemPrice < 0)
                     return;
 
-                var appliedRules = [];
+                _.each(orderlines, function(line){
+                    // Reset all lines promotion before playing through each rule.
+                    line.stop_processing = false;
+                    line.rules_applied = [];
+                });
 
                 // Play through each rule.
                 _.each(sorted_rules, function(rule){
@@ -228,12 +269,17 @@ models.load_models([
                     switch(rule.discount_type){
                         case 'to_percent':
                             _.each(orderlines, function(line){
-                                console.log(line);
-                                //rule.categories_applied["0"];
-                                // If the orderline is in the applicable category, apply.
+
+                                // If stop processing true on this line, skip.
+                                if (line.stop_processing)
+                                    return;
+
+                                // If orderline's product categories line up with the current rule, apply.
                                 if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])) {
                                     line.set_discount(rule.discount_amount);
-                                    appliedRules.push(rule.id);
+                                    line.rules_applied.push(rule.id);
+                                    if (rule.stop_processing)
+                                        line.stop_processing = true;
                                 }
                             });
                             break;
@@ -250,18 +296,14 @@ models.load_models([
 
                             // Iterate over each orderline.
                             _.each(orderlines, function(line){
-                                console.log(line);
+                                if (line.stop_processing)
+                                    return;
 
-                                var price = line.price;
-
-                                // rule.categories_applied["0"];
                                 // If the orderline is in the applicable category, apply.
                                 if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])) {
-                                    applied_lines.push(line);
                                     // Add the quantity.
                                     applied_qty += line.get_quantity();
-                                    appliedRules.push(rule.id);
-                                    //discounted_items.push(line);
+                                    applied_lines.push(line);
                                     line.set_discount(0);
                                 }
                             });
@@ -278,6 +320,9 @@ models.load_models([
 
                                 _.each(apply_to, function(line){
                                     line.set_discount(rule.discount_amount);
+                                    line.rules_applied.push(rule.id);
+                                    if (rule.stop_processing)
+                                        line.stop_processing = true;
                                 });
                             }
 

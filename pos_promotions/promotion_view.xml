@@ -5,48 +5,64 @@
       <field name="name">pos.promotion.form</field>
       <field name="model">pos.promotion</field>
       <field name="arch" type="xml">
-
         <form string="Promotion">
           <header>
-            <!--<button string="Disable Rule" type="object" name="disable_user" attrs="{'invisible': [('active','=',True)]}"/>
-            <button string="Enable Rule" type="object" name="enable_user" attrs="{'invisible': [('state','=',False)]}"/>
-            <field name="active" widget="statusbar" clickable="True"/>-->
+            <button string="Disable Rule" class="oe_highlight" type="object" name="Disable Rule" attrs="{'invisible': [('active','=',True)]}"/>
+            <button string="Enable Rule" class="oe_highlight" type="object" name="Enable Rule" attrs="{'invisible': [('active','=',False)]}"/>
           </header>
-          <sheet string="Promotion">
-              <!-- Content goes here: -->
-              <label name="name" string="Promotion Name" />
+          <sheet string="Promotion" colspan="4">
+              <label name="name" string="Promotion" colspan="4" />
               <newline/>
-            <h1>
-               <field name="name" placeholder="Promotion Name" /> <!-- Username-->
+            <h1 colspan="4">
+               <field name="name" placeholder="Promotion Name" colspan="4" />
             </h1>
-
-            <group name="group_left">
-                 <field name="label"/>
-                  <field name="locations"/>
+            <group name="group_left" colspan="4">
+                  <field name="label"/>
                   <field name="active"/>
-                  <field name="date_start"/>
-                  <field name="date_end"/>
-                  <field name="coupon_code"/>
-                  <field name="priority"/>
-                  <!--<h3>Apply and exclude tagged products</h3>
-                  <field name="tags_applied" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="tags_excluded" options="{'no_create': True}" widget="many2many_tags" />-->
-                  <field name="discount_type"/>
-                  <field name="discount_step"/>
-                  <field name="discount_amount"/>
-                  <field name="max_qty"/>
-                  <field name="stop_processing"/>
-                  <field name="categories_applied" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="categories_excluded" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="products_applied" options="{'no_create': True}" widget="many2many_tags" />
-                  <field name="products_excluded" options="{'no_create': True}" widget="many2many_tags" />
             </group>
-
-            <notebook>
-              <page string="Other Notes">
-                <field name="notes" placeholder="Add additional internal notes..." />
+            <notebook colspan="4">
+              <page string="Conditions">
+                  <group colspan="4">
+                      <group string="Locations" colspan="4">
+                          <field name="locations" colspan="4"/>
+                      </group>
+                      <group string="Date Range">
+                          <field name="date_start" />
+                          <field name="date_end" />
+                          <label name="date_end" colspan="2" string="Leave End Date empty to make rule apply forever until manually disabled." />
+                      </group>
+                      <group string="Other Conditions">
+                          <field name="coupon_code" />
+                          <label name="coupon_code" colspan="2" string="Coupon code will require scanning of barcode to make this rule apply." />
+                          <field name="priority" />
+                          <label name="priority" colspan="2" string="Rules are run against orders in order of priority, starting with lowest to highest."/>
+                      </group>
+                      <group string="Apply to" colspan="4">
+                          <field name="categories_applied" options="{'no_create': True}" widget="many2many_tags" />
+                          <field name="products_applied" options="{'no_create': True}" widget="many2many_tags" />
+                      </group>
+                  </group>
+              </page>
+              <page string="Promotion Actions">
+                  <group col="4">
+                      <group colspan="4">
+                          <field name="discount_type"/>
+                          <label name="discount_type" string="Type of Discount" colspan="3" />
+                          <field name="discount_step"/>
+                          <label name="discount_step" string="Step (Buy STEP Get Amount)" colspan="3" />
+                          <field name="discount_amount"/>
+                          <label name="discount_amount" string="Amount" colspan="3" />
+                          <field name="max_qty"/>
+                          <label name="max_qty" string="Maximum Quantity to Apply To" colspan="3" />
+                          <field name="stop_processing"/>
+                          <label name="stop_processing" string="Stop processing further rules on applicable products." colspan="3" />
+                      </group>
+                  </group>
               </page>
             </notebook>
+              <group colspan="4" col="1">
+                      <field name="notes" placeholder="Add additional internal notes..." />
+              </group>
           </sheet>
           <div class="oe_chatter">
             <field name="message_follower_ids" widget="mail_followers" />
@@ -55,7 +71,6 @@
         </form>
       </field>
     </record>
-
       <record model="ir.actions.act_window" id="action_list_promotions">
           <field name="name">Promotions</field>
           <field name="res_model">pos.promotion</field>
@@ -66,7 +81,9 @@
               </p>
           </field>
       </record>
-      <menuitem id="menu_promotions" parent="point_of_sale.menu_point_root" name="POS Promotions" sequence="10" action="action_list_promotions" />
+      <menuitem name="Promotions" id="menu_pos_promotions" parent="point_of_sale.menu_point_root" sequence="10"/>
+        <!--<menuitem parent="menu_point_of_sale" id="menu_point_ofsale" action="action_pos_pos_form" sequence="1" groups="group_pos_manager,group_pos_user"/>-->
+      <menuitem id="menu_pos_promotions_list" parent="menu_pos_promotions" name="Promotions" sequence="10" action="action_list_promotions" />
       <!-- POS Orderline - Add rule_stop -->
       <!--<record id="pos_inherited" model="ir.ui.view">
             <field name="name">POS View</field>
