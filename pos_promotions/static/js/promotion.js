@@ -234,6 +234,7 @@ models.load_models([
             self.execute_rules();
          },
          execute_rules: function(){
+            var self = this;
             // Get orderlines
             var order = this.pos.get_order();
             var orderlines = order.get_orderlines();
@@ -277,9 +278,17 @@ models.load_models([
                                 // If orderline's product categories line up with the current rule, apply.
                                 if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])) {
                                     line.set_discount(rule.discount_amount);
+
+                                    //line.set_discount((rule.discount_amount / line.discount))
+                                    //var discount_dollars = Math.min(Math.max(parseFloat(rule.discount_amount) || 0, 0),100);
+
+                                    // TODO: Discounts should continue to apply, but only onto the discounted amount.
+                                    var discount_dollars = line.price * line.quantity * (1 - line.discount/100);
+
                                     line.rules_applied.push(rule.id);
                                     if (rule.stop_processing)
                                         line.stop_processing = true;
+
                                 }
                             });
                             break;
