@@ -233,6 +233,33 @@ models.load_models([
             //this._super();
             self.execute_rules();
          },
+         // Apply discounts and verify can do it.
+         apply_discounts: function(line, rule){
+
+            // If no rules have been applied yet, reset discount to 0.
+            if (line.rules_applied.length == 0)
+                line.set_discount(0);
+
+            // If line's rules_applied already has this rule id, we stop.
+            if (_.contains(line.rules_applied, rule.id))
+                return;
+
+            // Get the discount amount of previous discounts, if any.
+            var discount_dollars = line.price * (1 - line.discount/100);
+
+            // Get the compounded discount, or just discount.
+            var discount_compounded = ((discount_dollars*(rule.discount_amount))/line.price);
+
+            // Set the discount.
+            line.set_discount(discount_compounded);
+
+            // Add this rule id to the rules_applied array.
+            line.rules_applied.push(rule.id);
+
+            // If this rule says to stop processing, we add stop processing to this line.
+            if (rule.stop_processing)
+               line.stop_processing = true;
+         },
          execute_rules: function(){
             var self = this;
             // Get orderlines
@@ -251,11 +278,7 @@ models.load_models([
                 if (itemPrice < 0)
                     return;
 
-                _.each(orderlines, function(line){
-                    // Reset all lines promotion before playing through each rule.
-                    line.stop_processing = false;
-                    line.rules_applied = [];
-                });
+
 
                 // Play through each rule.
                 _.each(sorted_rules, function(rule){
@@ -271,32 +294,44 @@ models.load_models([
                         case 'to_percent':
                             _.each(orderlines, function(line){
 
+
                                 // If stop processing true on this line, skip.
                                 if (line.stop_processing)
                                     return;
 
                                 // If orderline's product categories line up with the current rule, apply.
                                 if (_.contains(rule.categories_applied, line.product.pos_categ_id[0])) {
-                                    line.set_discount(rule.discount_amount);
+                                    self.apply_discounts(line,rule);
+
+                                /*  //line.set_discount(rule.discount_amount);
+                                    if (line.rules_applied.length == 0)
+                                        line.set_discount(0);
+
+                                    if (_.contains(line.rules_applied, rule.id))
+                                        return;
 
                                     //line.set_discount((rule.discount_amount / line.discount))
                                     //var discount_dollars = Math.min(Math.max(parseFloat(rule.discount_amount) || 0, 0),100);
 
                                     // TODO: Discounts should continue to apply, but only onto the discounted amount.
-                                    var discount_dollars = line.price * line.quantity * (1 - line.discount/100);
+                                    var discount_dollars = line.price * (1 - line.discount/100);
+
+                                    var discount_compounded = ((discount_dollars*(rule.discount_amount))/line.price);
+
+                                    line.set_discount(discount_compounded);
 
                                     line.rules_applied.push(rule.id);
                                     if (rule.stop_processing)
                                         line.stop_processing = true;
-
+                                 */
                                 }
+
                             });
                             break;
                         case 'bogo_cheapest':
                             //rule.discount_step;
                             //rule.discount_amount;
                             var minPrice = 99999;
-                            var applyItemId = null;
                             var step = rule.discount_step;
 
                             var discounted_items = [];
@@ -313,7 +348,6 @@ models.load_models([
                                     // Add the quantity.
                                     applied_qty += line.get_quantity();
                                     applied_lines.push(line);
-                                    line.set_discount(0);
                                 }
                             });
 
@@ -328,10 +362,13 @@ models.load_models([
                                 var apply_to = _.first(sorted_discounted_items, filter_qty);
 
                                 _.each(apply_to, function(line){
+                                    self.apply_discounts(line,rule);
+                                    /*
                                     line.set_discount(rule.discount_amount);
                                     line.rules_applied.push(rule.id);
                                     if (rule.stop_processing)
                                         line.stop_processing = true;
+                                    */
                                 });
                             }
 
@@ -343,6 +380,11 @@ models.load_models([
                     }
 
                 });
+            });
+            _.each(orderlines, function(line){
+                // Reset all lines promotion before playing through each rule.
+                line.stop_processing = false;
+                line.rules_applied = [];
             });
          }
     });
