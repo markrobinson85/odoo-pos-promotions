@@ -1,4 +1,4 @@
-odoo.define('pos.promotion', function (require) {
+odoo.define('pos_promotions.promotion', function (require) {
 "use strict";
 
 var models = require('point_of_sale.models');
