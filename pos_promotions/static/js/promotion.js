@@ -26,7 +26,6 @@ function formatDate(date) {
     return [year, month, day].join('-');
 }
 
-
 models.load_models([
     {
         model: 'pos.promotion',
