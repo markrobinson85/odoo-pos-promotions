@@ -33,8 +33,8 @@ class Discount(osv.osv):
     rule = fields.Many2many('pos.promotion', string="Promotions Applied")
     discount_applied = fields.Float("Discount Amount")
 
-class PromotionOrderLine(osv.osv):
-    _inherit = 'pos.order.line'
-    discount = fields.One2one("pos.promotion.discount")
+#class PromotionOrderLine(osv.osv):
+#    _inherit = 'pos.order.line'
+#    discount = fields.One2one("pos.promotion.discount")
     #rule_ids = fields.Char('Rules applied', default="")
     #rules_applied = fields.Many2many('pos.promotion', string="Promotions Applied")

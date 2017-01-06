@@ -60,60 +60,7 @@ models.load_models([
             self.promotions = promo_rules;
         },
     }
-/*    ,{
-        model: 'pos.promotion',
-        condition: function(self){ return !!self.loyalty; },
-        fields: ['name','type','product_id','category_id','cumulative','pp_product','pp_currency'],
-        domain: function(self){ return [['loyalty_program_id','=',self.loyalty.id]]; },
-        loaded: function(self,rules){
-
-            self.loyalty.rules = rules;
-            self.loyalty.rules_by_product_id = {};
-            self.loyalty.rules_by_category_id = {};
-
-            for (var i = 0; i < rules.length; i++){
-                var rule = rules[i];
-                if (rule.type === 'product') {
-                    if (!self.loyalty.rules_by_product_id[rule.product_id[0]]) {
-                        self.loyalty.rules_by_product_id[rule.product_id[0]] = [rule];
-                    } else if (rule.cumulative) {
-                        self.loyalty.rules_by_product_id[rule.product_id[0]].unshift(rule);
-                    } else {
-                        self.loyalty.rules_by_product_id[rule.product_id[0]].push(rule);
-                    }
-                } else if (rule.type === 'category') {
-                    var category = self.db.get_category_by_id(rule.category_id[0]);
-                    if (!self.loyalty.rules_by_category_id[category.id]) {
-                        self.loyalty.rules_by_category_id[category.id] = [rule];
-                    } else if (rule.cumulative) {
-                        self.loyalty.rules_by_category_id[category.id].unshift(rule);
-                    } else {
-                        self.loyalty.rules_by_category_id[category.id].push(rule);
-                    }
-                }
-            }
-        },
-    },{
-        model: 'loyalty.reward',
-        condition: function(self){ return !!self.loyalty; },
-        fields: ['name','type','minimum_points','gift_product_id','point_cost','discount_product_id','discount','point_value','point_product_id'],
-        domain: function(self){ return [['loyalty_program_id','=',self.loyalty.id]]; },
-        loaded: function(self,rewards){
-            self.loyalty.rewards = rewards;
-            self.loyalty.rewards_by_id = {};
-            for (var i = 0; i < rewards.length;i++) {
-                self.loyalty.rewards_by_id[rewards[i].id] = rewards[i];
-            }
-        },
-    },
-*/
 ],{'after': 'product.product'});
-
-//var _super = models.Order;
-//models.Order = models.Order.extend({
-
-//});
-
 
     var _super_orderline = models.Orderline;
     models.Orderline = models.Orderline.extend({
